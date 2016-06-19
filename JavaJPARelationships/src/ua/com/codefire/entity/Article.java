@@ -52,7 +52,7 @@ public class Article implements Serializable {
     @Column(name = "content")
     private String content;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "timstamp")
+    @Column(name = "timestamp")
     private Date timstamp;
 
     @ManyToOne

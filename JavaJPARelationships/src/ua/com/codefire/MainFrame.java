@@ -16,12 +16,18 @@
  */
 package ua.com.codefire;
 
+import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
+import javax.swing.table.TableModel;
+import ua.com.codefire.entity.Article;
 import ua.com.codefire.entity.Author;
 import ua.com.codefire.entity.Category;
 import ua.com.codefire.entity.User;
@@ -32,6 +38,12 @@ import ua.com.codefire.entity.User;
  */
 public class MainFrame extends javax.swing.JFrame {
 
+    static EntityManagerFactory factory;
+
+    static {
+        factory = Persistence.createEntityManagerFactory("MainPU");
+    }
+
     /**
      * Creates new form MainFrame
      */
@@ -40,8 +52,6 @@ public class MainFrame extends javax.swing.JFrame {
 
         this.setLocationRelativeTo(null);
 
-        // Connection
-        EntityManagerFactory factory = Persistence.createEntityManagerFactory("MainPU");
         // Statement
         EntityManager manager = factory.createEntityManager();
 
@@ -56,7 +66,28 @@ public class MainFrame extends javax.swing.JFrame {
         jlCategories.setModel(dlm);
 
         manager.close();
-        factory.close();
+//        factory.close();
+    }
+
+    private void showArticlesList() {
+        if (jlCategories.getSelectedIndex() >= 0) {
+            int selectedIndex = jlCategories.getSelectedIndex();
+            Category category = jlCategories.getModel().getElementAt(selectedIndex);
+
+            // Statement
+            EntityManager manager = factory.createEntityManager();
+
+            List<Article> articleList = category.getArticles();
+            DefaultComboBoxModel dcbm = new DefaultComboBoxModel();
+
+            for (Article article : articleList) {
+                dcbm.addElement(article);
+            }
+
+            jcbArtcles.setModel(dcbm);
+            
+            manager.close();;
+        }
     }
 
     /**
@@ -89,6 +120,11 @@ public class MainFrame extends javax.swing.JFrame {
         jlCategories.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jlCategoriesMouseClicked(evt);
+            }
+        });
+        jlCategories.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jlCategoriesKeyPressed(evt);
             }
         });
         jScrollPane1.setViewportView(jlCategories);
@@ -196,7 +232,7 @@ public class MainFrame extends javax.swing.JFrame {
         if (evt.getClickCount() == 2) {
             evt.consume();
 
-            // TODO add your handling code here:
+            showArticlesList();
         }
 
     }//GEN-LAST:event_jlCategoriesMouseClicked
@@ -206,6 +242,10 @@ public class MainFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
 
     }//GEN-LAST:event_jcbArtclesActionPerformed
+
+    private void jlCategoriesKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jlCategoriesKeyPressed
+        showArticlesList();
+    }//GEN-LAST:event_jlCategoriesKeyPressed
 
     /**
      * @param args the command line arguments
@@ -250,7 +290,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton jbCategoriesAdd;
     private javax.swing.JButton jbCategoriesDel;
     private javax.swing.JComboBox<String> jcbArtcles;
-    private javax.swing.JList<String> jlCategories;
+    private javax.swing.JList<Category> jlCategories;
     private javax.swing.JMenu jmArticle;
     private javax.swing.JMenu jmFile;
     private javax.swing.JMenuBar jmbMain;
