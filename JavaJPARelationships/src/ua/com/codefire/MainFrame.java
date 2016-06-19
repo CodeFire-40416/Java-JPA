@@ -40,7 +40,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         this.setLocationRelativeTo(null);
 
-// Connection
+        // Connection
         EntityManagerFactory factory = Persistence.createEntityManagerFactory("MainPU");
         // Statement
         EntityManager manager = factory.createEntityManager();
@@ -54,6 +54,9 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
         jlCategories.setModel(dlm);
+
+        manager.close();
+        factory.close();
     }
 
     /**
