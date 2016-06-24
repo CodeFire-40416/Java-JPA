@@ -16,7 +16,15 @@
  */
 package ua.com.codefire;
 
+import java.util.List;
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
+import ua.com.codefire.entity.Article;
+import ua.com.codefire.entity.Category;
 
 /**
  *
@@ -25,12 +33,17 @@ import javax.persistence.EntityManagerFactory;
 public class MainFrame extends javax.swing.JFrame {
 
     private EntityManagerFactory factory;
+    private Article selectedArticle;
 
     /**
      * Creates new form MainFrame
      */
     public MainFrame() {
         initComponents();
+        factory = Persistence.createEntityManagerFactory("MainPU");
+        refreshCategories();
+        
+
     }
 
     /**
@@ -51,12 +64,14 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jtaArticleContent = new javax.swing.JTextArea();
+        jlArticleStatus = new javax.swing.JLabel();
         jmbMain = new javax.swing.JMenuBar();
         jmFile = new javax.swing.JMenu();
         jmiExit = new javax.swing.JMenuItem();
         jmArticle = new javax.swing.JMenu();
         jmiArticleAddNew = new javax.swing.JMenuItem();
         jmiArticleDeleteSelected = new javax.swing.JMenuItem();
+        jmiArticleSave = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -84,9 +99,13 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel2.setText("Article:");
 
         jtaArticleContent.setColumns(20);
+        jtaArticleContent.setLineWrap(true);
         jtaArticleContent.setRows(5);
+        jtaArticleContent.setAutoscrolls(false);
         jtaArticleContent.setEnabled(false);
         jScrollPane2.setViewportView(jtaArticleContent);
+
+        jlArticleStatus.setText(" ");
 
         jmFile.setText("File");
 
@@ -97,11 +116,22 @@ public class MainFrame extends javax.swing.JFrame {
         jmbMain.add(jmFile);
 
         jmArticle.setText("Article");
+        jmArticle.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmArticleActionPerformed(evt);
+            }
+        });
 
         jmiArticleAddNew.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
         jmiArticleAddNew.setText("Add new...");
+        jmiArticleAddNew.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmiArticleAddNewActionPerformed(evt);
+            }
+        });
         jmArticle.add(jmiArticleAddNew);
 
+        jmiArticleDeleteSelected.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.CTRL_MASK));
         jmiArticleDeleteSelected.setText("Delete selected");
         jmiArticleDeleteSelected.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -109,6 +139,15 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
         jmArticle.add(jmiArticleDeleteSelected);
+
+        jmiArticleSave.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+        jmiArticleSave.setText("Save selected");
+        jmiArticleSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmiArticleSaveActionPerformed(evt);
+            }
+        });
+        jmArticle.add(jmiArticleSave);
 
         jmbMain.add(jmArticle);
 
@@ -133,7 +172,8 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(jcbArtcles, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel2)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jlArticleStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -146,40 +186,113 @@ public class MainFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 421, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jbCategoriesAdd)
-                            .addComponent(jbCategoriesDel)))
-                    .addGroup(layout.createSequentialGroup()
                         .addComponent(jcbArtcles, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2)))
+                        .addComponent(jScrollPane2))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 421, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jbCategoriesAdd)
+                    .addComponent(jbCategoriesDel)
+                    .addComponent(jlArticleStatus))
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+    
+    private void refreshCategories() {
+            EntityManager manager = factory.createEntityManager();
 
+        TypedQuery<Category> query = manager.createQuery("SELECT u FROM Category u", Category.class);
+        List<Category> CategoriesList = query.getResultList();
+
+        DefaultListModel dlm = new DefaultListModel();
+//        for (Category category : CategoriesList) {
+//            System.out.printf("#%d %s\n", category.getId(), category.getName());
+//        }
+
+        for (Category category : CategoriesList) {
+            dlm.addElement(category);
+        }
+
+        jlCategories.setModel(dlm);
+
+        manager.close();
+}
     private void jmiArticleDeleteSelectedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiArticleDeleteSelectedActionPerformed
-        // TODO add your handling code here:
+        if (selectedArticle != null) {
+            EntityManager manager = factory.createEntityManager();
+            Article toDel = manager.merge(selectedArticle);
+            manager.getTransaction().begin();
+            manager.remove(toDel);
+            manager.getTransaction().commit();
+            manager.close();
+            String deletedStatus = String.format("Aricle %s whith id = %s DELETED", selectedArticle.getTitle(), selectedArticle.getId());
+            jlArticleStatus.setText(deletedStatus);
+            refreshCategories();
+        }
     }//GEN-LAST:event_jmiArticleDeleteSelectedActionPerformed
 
     private void jlCategoriesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jlCategoriesMouseClicked
 
         if (evt.getClickCount() == 2) {
             evt.consume();
+//            EntityManager manager = factory.createEntityManager();
 
-            // TODO add your handling code here:
+            if (jlCategories.getSelectedIndex() >= 0) {
+
+                Category category = jlCategories.getSelectedValue();
+
+                List<Article> selectedArticles = category.getArticles();
+
+
+                DefaultComboBoxModel dcbm = new DefaultComboBoxModel();
+
+                for (Article article : selectedArticles) {
+                    dcbm.addElement(article);
+                }
+
+                jcbArtcles.setModel(dcbm);
+
+//                manager.close();
+            }
         }
 
     }//GEN-LAST:event_jlCategoriesMouseClicked
 
     private void jcbArtclesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbArtclesActionPerformed
 
-        // TODO add your handling code here:
+//        EntityManager manager = factory.createEntityManager();
+//        
+        selectedArticle = (Article) jcbArtcles.getSelectedItem();
+//            jtaArticleContent.setLineWrap(true);
 
+        jtaArticleContent.setText(selectedArticle.getContent());
+        jtaArticleContent.setEnabled(true);
     }//GEN-LAST:event_jcbArtclesActionPerformed
+
+    private void jmiArticleAddNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiArticleAddNewActionPerformed
+
+    }//GEN-LAST:event_jmiArticleAddNewActionPerformed
+
+    private void jmiArticleSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiArticleSaveActionPerformed
+        if (selectedArticle != null) {
+            EntityManager manager = factory.createEntityManager();
+            selectedArticle.setContent(jtaArticleContent.getText());
+            manager.getTransaction().begin();
+            manager.merge(selectedArticle);
+            manager.getTransaction().commit();
+            manager.close();
+            String savedStatus = String.format("Aricle %s whith id = %s SAVED", selectedArticle.getTitle(), selectedArticle.getId());
+            jlArticleStatus.setText(savedStatus);
+            refreshCategories();
+        }
+    }//GEN-LAST:event_jmiArticleSaveActionPerformed
+
+    private void jmArticleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmArticleActionPerformed
+
+    }//GEN-LAST:event_jmArticleActionPerformed
 
     /**
      * @param args the command line arguments
@@ -223,13 +336,15 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JButton jbCategoriesAdd;
     private javax.swing.JButton jbCategoriesDel;
-    private javax.swing.JComboBox<String> jcbArtcles;
-    private javax.swing.JList<String> jlCategories;
+    private javax.swing.JComboBox<Article> jcbArtcles;
+    private javax.swing.JLabel jlArticleStatus;
+    private javax.swing.JList<Category> jlCategories;
     private javax.swing.JMenu jmArticle;
     private javax.swing.JMenu jmFile;
     private javax.swing.JMenuBar jmbMain;
     private javax.swing.JMenuItem jmiArticleAddNew;
     private javax.swing.JMenuItem jmiArticleDeleteSelected;
+    private javax.swing.JMenuItem jmiArticleSave;
     private javax.swing.JMenuItem jmiExit;
     private javax.swing.JTextArea jtaArticleContent;
     // End of variables declaration//GEN-END:variables
