@@ -52,8 +52,8 @@ public class Article implements Serializable {
     @Column(name = "content")
     private String content;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "timstamp")
-    private Date timstamp;
+    @Column(name = "timestamp")
+    private Date timestamp;
 
     @ManyToOne
     @JoinColumn(name = "author_id", referencedColumnName = "id")
@@ -73,7 +73,7 @@ public class Article implements Serializable {
     public Article(String title, String content, Date timstamp) {
         this.title = title;
         this.content = content;
-        this.timstamp = timstamp;
+        this.timestamp = timstamp;
     }
 
     public Integer getId() {
@@ -101,11 +101,11 @@ public class Article implements Serializable {
     }
 
     public Date getTimstamp() {
-        return timstamp;
+        return timestamp;
     }
 
     public void setTimstamp(Date timstamp) {
-        this.timstamp = timstamp;
+        this.timestamp = timstamp;
     }
 
     public Author getAuthor() {
@@ -151,7 +151,7 @@ public class Article implements Serializable {
 
     @Override
     public String toString() {
-        return "Article{" + "id=" + id + ", title=" + title + ", content=" + content + ", timstamp=" + timstamp + '}';
+        return "Title = " + title + " (id = " + id + " )";
     }
 
 }
