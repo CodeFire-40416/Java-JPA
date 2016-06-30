@@ -31,6 +31,7 @@ public class CreateArcticleFrame extends javax.swing.JFrame {
     public CreateArcticleFrame() {
         initComponents();
 
+        
         getRootPane().setDefaultButton(jbCancel);
 
         jcbCategories.setModel(dcbm1);
