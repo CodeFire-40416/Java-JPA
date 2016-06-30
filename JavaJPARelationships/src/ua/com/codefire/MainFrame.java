@@ -23,6 +23,8 @@ import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import ua.com.codefire.entity.Article;
 import ua.com.codefire.entity.Category;
 
@@ -34,6 +36,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     private EntityManagerFactory factory;
     private Article selectedArticle;
+    CreateArcticleFrame createArcticleFrame = new CreateArcticleFrame(); 
 
     /**
      * Creates new form MainFrame
@@ -41,8 +44,11 @@ public class MainFrame extends javax.swing.JFrame {
     public MainFrame() {
         initComponents();
         factory = Persistence.createEntityManagerFactory("MainPU");
-        refreshCategories();
         
+        
+        refreshCategories();
+
+        setLocationRelativeTo(null);
 
     }
 
@@ -111,6 +117,11 @@ public class MainFrame extends javax.swing.JFrame {
 
         jmiExit.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
         jmiExit.setText("Exit");
+        jmiExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmiExitActionPerformed(evt);
+            }
+        });
         jmFile.add(jmiExit);
 
         jmbMain.add(jmFile);
@@ -200,9 +211,9 @@ public class MainFrame extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-    
+
     private void refreshCategories() {
-            EntityManager manager = factory.createEntityManager();
+        EntityManager manager = factory.createEntityManager();
 
         TypedQuery<Category> query = manager.createQuery("SELECT u FROM Category u", Category.class);
         List<Category> CategoriesList = query.getResultList();
@@ -213,26 +224,34 @@ public class MainFrame extends javax.swing.JFrame {
 //        }
 
         for (Category category : CategoriesList) {
+            createArcticleFrame.dcbm1.addElement(category);
             dlm.addElement(category);
+            
         }
 
         jlCategories.setModel(dlm);
 
         manager.close();
-}
+    }
     private void jmiArticleDeleteSelectedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiArticleDeleteSelectedActionPerformed
-        if (selectedArticle != null) {
-            EntityManager manager = factory.createEntityManager();
-            Article toDel = manager.merge(selectedArticle);
-            manager.getTransaction().begin();
-            manager.remove(toDel);
-            manager.getTransaction().commit();
-            manager.close();
-            String deletedStatus = String.format("Aricle %s whith id = %s DELETED", selectedArticle.getTitle(), selectedArticle.getId());
-            jlArticleStatus.setText(deletedStatus);
-            refreshCategories();
-        }
+        int response = JOptionPane.showConfirmDialog(this, "You are sure want delete selected article?", "DELETE",
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        if (response == JFileChooser.APPROVE_OPTION) {
+
+            if (selectedArticle != null) {
+                EntityManager manager = factory.createEntityManager();
+                Article toDel = manager.merge(selectedArticle);
+                manager.getTransaction().begin();
+                manager.remove(toDel);
+                manager.getTransaction().commit();
+                manager.close();
+                String deletedStatus = String.format("Aricle %s whith id = %s DELETED", selectedArticle.getTitle(), selectedArticle.getId());
+                jlArticleStatus.setText(deletedStatus);
+                refreshCategories();
+            }
     }//GEN-LAST:event_jmiArticleDeleteSelectedActionPerformed
+    }
 
     private void jlCategoriesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jlCategoriesMouseClicked
 
@@ -245,7 +264,6 @@ public class MainFrame extends javax.swing.JFrame {
                 Category category = jlCategories.getSelectedValue();
 
                 List<Article> selectedArticles = category.getArticles();
-
 
                 DefaultComboBoxModel dcbm = new DefaultComboBoxModel();
 
@@ -273,7 +291,9 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jcbArtclesActionPerformed
 
     private void jmiArticleAddNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiArticleAddNewActionPerformed
-
+        
+        createArcticleFrame.setLocationRelativeTo(this);
+        createArcticleFrame.setVisible(true);
     }//GEN-LAST:event_jmiArticleAddNewActionPerformed
 
     private void jmiArticleSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiArticleSaveActionPerformed
@@ -294,6 +314,15 @@ public class MainFrame extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jmArticleActionPerformed
 
+    private void jmiExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiExitActionPerformed
+        int response = JOptionPane.showConfirmDialog(this, "You are sure want exit?", "Exit",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+        if (response == JFileChooser.APPROVE_OPTION) {
+            dispose();
+        }
+    }//GEN-LAST:event_jmiExitActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -308,16 +337,24 @@ public class MainFrame extends javax.swing.JFrame {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
+
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainFrame.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainFrame.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainFrame.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MainFrame.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
