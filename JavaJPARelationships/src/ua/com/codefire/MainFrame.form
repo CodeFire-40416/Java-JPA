@@ -165,14 +165,18 @@
     <Component class="javax.swing.JButton" name="jbCategoriesAdd">
       <Properties>
         <Property name="text" type="java.lang.String" value="+"/>
-        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jbCategoriesAddActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="jbCategoriesDel">
       <Properties>
         <Property name="text" type="java.lang.String" value="-"/>
-        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jbCategoriesDelActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel1">
       <Properties>

@@ -36,7 +36,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     private EntityManagerFactory factory;
     private Article selectedArticle;
-    CreateArcticleFrame createArcticleFrame = new CreateArcticleFrame(); 
+    CreateArcticleFrame createArcticleFrame = new CreateArcticleFrame();
 
     /**
      * Creates new form MainFrame
@@ -44,8 +44,7 @@ public class MainFrame extends javax.swing.JFrame {
     public MainFrame() {
         initComponents();
         factory = Persistence.createEntityManagerFactory("MainPU");
-        
-        
+
         refreshCategories();
 
         setLocationRelativeTo(null);
@@ -89,10 +88,18 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane1.setViewportView(jlCategories);
 
         jbCategoriesAdd.setText("+");
-        jbCategoriesAdd.setEnabled(false);
+        jbCategoriesAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbCategoriesAddActionPerformed(evt);
+            }
+        });
 
         jbCategoriesDel.setText("-");
-        jbCategoriesDel.setEnabled(false);
+        jbCategoriesDel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbCategoriesDelActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText("Category:");
 
@@ -226,7 +233,7 @@ public class MainFrame extends javax.swing.JFrame {
         for (Category category : CategoriesList) {
             createArcticleFrame.dcbm1.addElement(category);
             dlm.addElement(category);
-            
+
         }
 
         jlCategories.setModel(dlm);
@@ -291,7 +298,7 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jcbArtclesActionPerformed
 
     private void jmiArticleAddNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiArticleAddNewActionPerformed
-        
+
         createArcticleFrame.setLocationRelativeTo(this);
         createArcticleFrame.setVisible(true);
     }//GEN-LAST:event_jmiArticleAddNewActionPerformed
@@ -322,6 +329,44 @@ public class MainFrame extends javax.swing.JFrame {
             dispose();
         }
     }//GEN-LAST:event_jmiExitActionPerformed
+
+    private void jbCategoriesAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbCategoriesAddActionPerformed
+        Category newCategory = new Category();
+        newCategory.setName(JOptionPane.showInputDialog("Enter new Category"));
+
+        EntityManager manager = factory.createEntityManager();
+
+        manager.getTransaction().begin();
+
+        manager.persist(newCategory);
+
+        manager.getTransaction().commit();
+
+        manager.close();
+
+        refreshCategories();
+    }//GEN-LAST:event_jbCategoriesAddActionPerformed
+
+    private void jbCategoriesDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbCategoriesDelActionPerformed
+        if (jlCategories.isSelectionEmpty()) {
+            JOptionPane.showMessageDialog(rootPane, "Nothing to Delete");
+        } else {
+            Category selectedCategory = jlCategories.getSelectedValue();
+            EntityManager manager = factory.createEntityManager();
+            
+            Category delCategory = manager.merge(selectedCategory);
+
+            manager.getTransaction().begin();
+
+            manager.remove(delCategory);
+
+            manager.getTransaction().commit();
+
+            manager.close();
+
+            refreshCategories();
+        }
+    }//GEN-LAST:event_jbCategoriesDelActionPerformed
 
     /**
      * @param args the command line arguments
