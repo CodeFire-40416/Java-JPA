@@ -229,6 +229,7 @@ public class MainFrame extends javax.swing.JFrame {
 //        for (Category category : CategoriesList) {
 //            System.out.printf("#%d %s\n", category.getId(), category.getName());
 //        }
+        createArcticleFrame.dcbm1.removeAllElements();
 
         for (Category category : CategoriesList) {
             createArcticleFrame.dcbm1.addElement(category);
@@ -365,6 +366,8 @@ public class MainFrame extends javax.swing.JFrame {
             manager.close();
 
             refreshCategories();
+            
+            JOptionPane.showMessageDialog(rootPane, "Deleted");
         }
     }//GEN-LAST:event_jbCategoriesDelActionPerformed
 
