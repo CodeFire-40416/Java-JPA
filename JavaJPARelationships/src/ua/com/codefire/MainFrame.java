@@ -261,6 +261,29 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jmiArticleDeleteSelectedActionPerformed
     }
 
+    private void refreshArticles() {
+        Category category = jlCategories.getSelectedValue();
+
+        List<Article> selectedArticles = category.getArticles();
+
+        DefaultComboBoxModel dcbm = new DefaultComboBoxModel();
+
+        for (Article article : selectedArticles) {
+            dcbm.addElement(article);
+        }
+
+        jcbArtcles.setModel(dcbm);
+
+        if (selectedArticles.isEmpty()) {
+
+        } else {
+            jtaArticleContent.setText(selectedArticles.get(0).getContent());
+            jtaArticleContent.setEnabled(true);
+
+        }
+    }
+
+
     private void jlCategoriesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jlCategoriesMouseClicked
 
         if (evt.getClickCount() == 2) {
@@ -268,20 +291,8 @@ public class MainFrame extends javax.swing.JFrame {
 //            EntityManager manager = factory.createEntityManager();
 
             if (jlCategories.getSelectedIndex() >= 0) {
-
-                Category category = jlCategories.getSelectedValue();
-
-                List<Article> selectedArticles = category.getArticles();
-
-                DefaultComboBoxModel dcbm = new DefaultComboBoxModel();
-
-                for (Article article : selectedArticles) {
-                    dcbm.addElement(article);
-                }
-
-                jcbArtcles.setModel(dcbm);
-
-//                manager.close();
+                refreshArticles();
+                refreshCategories();
             }
         }
 
@@ -296,6 +307,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         jtaArticleContent.setText(selectedArticle.getContent());
         jtaArticleContent.setEnabled(true);
+        refreshArticles();
     }//GEN-LAST:event_jcbArtclesActionPerformed
 
     private void jmiArticleAddNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiArticleAddNewActionPerformed
@@ -315,6 +327,7 @@ public class MainFrame extends javax.swing.JFrame {
             String savedStatus = String.format("Aricle %s whith id = %s SAVED", selectedArticle.getTitle(), selectedArticle.getId());
             jlArticleStatus.setText(savedStatus);
             refreshCategories();
+            refreshArticles();
         }
     }//GEN-LAST:event_jmiArticleSaveActionPerformed
 
@@ -353,8 +366,10 @@ public class MainFrame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(rootPane, "Nothing to Delete");
         } else {
             Category selectedCategory = jlCategories.getSelectedValue();
+
+            jlCategories.remove(jlCategories.getSelectedIndex());
             EntityManager manager = factory.createEntityManager();
-            
+
             Category delCategory = manager.merge(selectedCategory);
 
             manager.getTransaction().begin();
@@ -366,8 +381,11 @@ public class MainFrame extends javax.swing.JFrame {
             manager.close();
 
             refreshCategories();
-            
+            refreshArticles();
+
             JOptionPane.showMessageDialog(rootPane, "Deleted");
+
+            jlCategories.remove(jlCategories.getSelectedIndex());
         }
     }//GEN-LAST:event_jbCategoriesDelActionPerformed
 
