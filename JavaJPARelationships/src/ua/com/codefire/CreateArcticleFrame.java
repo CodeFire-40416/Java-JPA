@@ -5,6 +5,7 @@
  */
 package ua.com.codefire;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 import javax.persistence.EntityManager;
@@ -31,12 +32,14 @@ public class CreateArcticleFrame extends javax.swing.JFrame {
     public CreateArcticleFrame() {
         initComponents();
 
-        
         getRootPane().setDefaultButton(jbCancel);
 
         jcbCategories.setModel(dcbm1);
-        factory1 = Persistence.createEntityManagerFactory("MainPU");
         
+        jtaArticleContent.setText("");
+        jtfArticleTitle.setText("Article Title");
+        
+        factory1 = Persistence.createEntityManagerFactory("MainPU");
 
     }
 
@@ -136,33 +139,32 @@ public class CreateArcticleFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jbCancelActionPerformed
 
     private void jbSaveArticleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbSaveArticleActionPerformed
-        
+
         article.setTitle(jtfArticleTitle.getText());
         article.setContent(jtaArticleContent.getText());
         article.setTimstamp(new Date());
         EntityManager manager = factory1.createEntityManager();
+        Category selectedCategory = (Category) jcbCategories.getSelectedItem();
+
+        List<Category> categories = new ArrayList<>();
+        categories.add(selectedCategory);
+        article.setCategories(categories);
 
         manager.getTransaction().begin();
 
         manager.persist(article);
 
         manager.getTransaction().commit();
-        
+
         manager.close();
-        
+
         dispose();
-        
+
     }//GEN-LAST:event_jbSaveArticleActionPerformed
 
     private void jcbCategoriesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbCategoriesActionPerformed
-        
-        Category selectedCategory = (Category)jcbCategories.getSelectedItem();
 
-        List<Category> categories = null;
-        categories.add(selectedCategory);
-        article.setCategories(categories);
-        
-        
+
     }//GEN-LAST:event_jcbCategoriesActionPerformed
 
     /**
